@@ -15,6 +15,9 @@ dotenv.config();
 
 //CREATE NEW BOOK
 app.post('/api/save',authenticateToken, (req, res) => {
+    if(req.body.title === null || req.body.author ===null ||  req.body.publishedDate){
+        res.status(400).json({message: "The book object is Invalid"});
+    }
     const book = new Book({
         title: req.body.title,
         author: req.body.author,
@@ -32,8 +35,12 @@ app.post('/api/save',authenticateToken, (req, res) => {
 
 //GET A BOOK WITH HIS ID
 app.get('/api/:id',authenticateToken , (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
     let book ={};
+
+    if(id === null){
+        res.status(404).json({message: "The Book ID is null"})
+    }
 
     Book.findById(id).then((result)=>{
         console.log(result)
@@ -69,7 +76,7 @@ app.put('/api/:id',authenticateToken, (req, res) => {
     })
         .catch((e)=>{
             console.log(e);
-            res.status(500).json({message: "internal server error"})
+            res.status(500).json({message: "Book not found"})
         })
 
 });
@@ -84,7 +91,7 @@ app.delete('/api/:id',authenticateToken, (req, res)=>{
         res.status(200).json({message: "book delete successfully"});
     }).catch((e)=>{
         console.log(e);
-        res.status(500).json({message: "internal server error"})
+        res.status(500).json({message: "Book not found"})
     })
 
 });
