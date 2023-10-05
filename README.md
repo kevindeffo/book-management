@@ -1,7 +1,8 @@
+
 // README.md
 # Book Management 
 ### Introduction
-Book management is a REST API created with expressJs for CODEVIGOR's junior backend developer recruitment test.
+Book management is a REST API created with expressJs and MongoDb for CODEVIGOR's junior backend developer recruitment test.
 ###  Features
 * Users can login to their accounts
 * Authenticated users can access all books as well as create a new book, edit and delete a book.
@@ -28,3 +29,4 @@ Book management is a REST API created with expressJs for CODEVIGOR's junior back
 To connect to the API, use the following information
 - username: kevindeffo
 - password: 12345
+
