@@ -4,7 +4,7 @@ const cors = require("cors");
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-const uri = "mongodb+srv://deffokevin14:admindb@cluster0.grrpo4s.mongodb.net/?retryWrites=true&w=majority/book-app";
+const uri = "mongodb+srv://deffokevin14:admindb@cluster0.grrpo4s.mongodb.net/?retryWrites=true&w=majority";
 
 try {
     mongoose.connect(uri,{  useNewUrlParser: true})

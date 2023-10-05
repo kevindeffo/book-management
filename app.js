@@ -1,6 +1,7 @@
 const app = require('./server')
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
+const Book = require('./book_model')
 
 const data = require('./datas')
 const books = data.books;
@@ -14,26 +15,46 @@ dotenv.config();
 
 //CREATE NEW BOOK
 app.post('/api/save',authenticateToken, (req, res) => {
-    books.push(req.body);
-    res.status(200).json("book save successfully");
+    const book = new Book({
+        title: req.body.title,
+        author: req.body.author,
+        publishedDate: req.body.publishedDate
+    });
+
+    book.save().then(r => {
+        res.status(200).json("book save successfully");
+    }).catch(err => {
+        console.log('error:', err)
+        res.status(400).json(err)
+    });
 });
 
 
 //GET A BOOK WITH HIS ID
 app.get('/api/:id',authenticateToken , (req, res) => {
     const id = req.params.id
-    let book ={}
+    let book ={};
 
-    //GET  ID OF THE ELEMENT
-    let index = books.findIndex(book=> book.id.toString() === id.toString())
-    book = books[index];
-    res.status(200).json({book});
+    Book.findById(id).then((result)=>{
+        console.log(result)
+        res.status(200).json({result});
+    })
+        .catch((e)=>{
+            res.status(404).json({message: "Book not found"})
+        })
+
 });
 
 
 //GET ALL THE BOOKS
 app.get('/api',authenticateToken, (req, res) => {
-    res.status(200).json({books});
+    Book.find().then((result)=>{
+        res.status(200).json({result});
+    }).catch((e)=>{
+        console.log(e);
+        res.status(500).json(e)
+    })
+    // res.status(200).json({books});
 });
 
 
@@ -41,10 +62,16 @@ app.get('/api',authenticateToken, (req, res) => {
 app.put('/api/:id',authenticateToken, (req, res) => {
     const id = req.params.id
 
-    //GET  ID OF THE ELEMENT TO UPDATE
-    let index = books.findIndex(book => book.id.toString() === id.toString());
-    books[index] = req.body;
-    res.status(200).json({message: "book update successfully", book: req.body});
+    Book.findByIdAndUpdate(id, req.body)
+        .then((r)=>{
+            console.log(r);
+            res.status(200).json({message: "book update successfully", book: req.body});
+    })
+        .catch((e)=>{
+            console.log(e);
+            res.status(500).json({message: "internal server error"})
+        })
+
 });
 
 
@@ -52,17 +79,20 @@ app.put('/api/:id',authenticateToken, (req, res) => {
 app.delete('/api/:id',authenticateToken, (req, res)=>{
     const id = req.params.id
 
-    //GET  ID OF THE ELEMENT TO DELETE
-    let index = books.findIndex(book=> book.id.toString() === id.toString())
+    Book.findOneAndDelete(id).then((r)=>{
+        console.log(r);
+        res.status(200).json({message: "book delete successfully"});
+    }).catch((e)=>{
+        console.log(e);
+        res.status(500).json({message: "internal server error"})
+    })
 
-    books.splice(index, 1);
-    res.status(200).json({message: "book delete successfully"});
 });
 
 
 //GENERATE A TOKEN
 function generateAccessToken(username) {
-    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+    return jwt.sign(username, process.env.TOKEN_SECRET, { expiresIn: '3600s' });
 }
 
 
@@ -88,17 +118,17 @@ app.post('/api/user/signin', (req, res)=>{
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization']
 
-    const token = authHeader && authHeader.split(' ')[1]
+    const token = authHeader && authHeader.split(' ')[1];
 
-    console.log(token);
+    console.log(token)
+
 
     if (token == null) return res.sendStatus(401)
 
     jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-        console.log(err)
 
-        if (err) return res.sendStatus(403)
-
+        if (err) return res.status(403).json({message: err.toString()})
+        console.log(err);
         req.user = user
 
         next()
