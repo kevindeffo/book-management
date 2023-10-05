@@ -1,7 +1,12 @@
 const express = require('express')
 const app = express()
 const cors = require("cors");
-const port = 4000
+const dotenv = require('dotenv');
+
+// get config vars
+dotenv.config();
+
+const port = process.env.PORT || 5000
 
 
 // formatting incoming data
